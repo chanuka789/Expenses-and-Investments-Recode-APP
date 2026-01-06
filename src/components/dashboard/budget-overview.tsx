@@ -39,7 +39,7 @@ export function BudgetOverview({ userId }: BudgetOverviewProps) {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
       // Fetch active budgets
-      const { data: budgetsData } = await supabase
+      const { data: budgetsRaw } = await supabase
         .from('budgets')
         .select(`
           id,
@@ -52,19 +52,22 @@ export function BudgetOverview({ userId }: BudgetOverviewProps) {
         .eq('is_active', true)
         .limit(5)
 
+      const budgetsData = budgetsRaw as any[] | null
       if (!budgetsData) {
         setIsLoading(false)
         return
       }
 
       // Fetch transactions for spending calculation
-      const { data: transactions } = await supabase
+      const { data: txRaw } = await supabase
         .from('transactions')
         .select('amount, category_id')
         .eq('user_id', userId)
         .eq('type', 'expense')
         .gte('date', monthStart.toISOString().split('T')[0])
         .lte('date', monthEnd.toISOString().split('T')[0])
+
+      const transactions = txRaw as any[] | null
 
       // Calculate spent amounts
       const budgetsWithSpent = budgetsData.map((budget) => {

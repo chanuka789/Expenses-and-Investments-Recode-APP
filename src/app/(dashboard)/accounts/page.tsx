@@ -134,7 +134,7 @@ export default function AccountsPage() {
       if (editingAccount) {
         const { error } = await supabase
           .from('accounts')
-          .update({ name, type, color, include_in_total: includeInTotal })
+          .update({ name, type, color, include_in_total: includeInTotal } as any)
           .eq('id', editingAccount.id)
 
         if (error) throw error
@@ -142,7 +142,7 @@ export default function AccountsPage() {
       } else {
         const { error } = await supabase
           .from('accounts')
-          .insert(accountData)
+          .insert(accountData as any)
 
         if (error) throw error
         toast({ title: 'Account created' })

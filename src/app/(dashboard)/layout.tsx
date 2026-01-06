@@ -25,10 +25,11 @@ export default async function DashboardLayout({
     .eq('id', session.user.id)
     .single()
 
+  const profileData = profile as any
   const user = {
     email: session.user.email,
-    full_name: profile?.full_name || session.user.user_metadata?.full_name,
-    avatar_url: profile?.avatar_url,
+    full_name: profileData?.full_name || session.user.user_metadata?.full_name,
+    avatar_url: profileData?.avatar_url,
   }
 
   return (

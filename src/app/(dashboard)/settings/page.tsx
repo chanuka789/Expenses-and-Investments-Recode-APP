@@ -83,12 +83,13 @@ export default function SettingsPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
 
-    const { data } = await supabase
+    const { data: profileRaw } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', session.user.id)
       .single()
 
+    const data = profileRaw as any
     if (data) {
       setProfile(data)
       setFullName(data.full_name || '')
@@ -112,7 +113,7 @@ export default function SettingsPage() {
         base_currency: baseCurrency,
         month_start_day: parseInt(monthStartDay),
         date_format: dateFormat,
-      })
+      } as any)
       .eq('id', session.user.id)
 
     if (error) {

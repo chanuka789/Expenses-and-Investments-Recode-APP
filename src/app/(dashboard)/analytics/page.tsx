@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
     const startDate = subMonths(endDate, months)
 
     // Fetch all transactions in range
-    const { data: transactions } = await supabase
+    const { data: txData } = await supabase
       .from('transactions')
       .select(`
         type, amount, date, merchant,
@@ -87,6 +87,7 @@ export default function AnalyticsPage() {
       .gte('date', format(startDate, 'yyyy-MM-dd'))
       .lte('date', format(endDate, 'yyyy-MM-dd'))
 
+    const transactions = txData as any[] | null
     if (!transactions) {
       setIsLoading(false)
       return

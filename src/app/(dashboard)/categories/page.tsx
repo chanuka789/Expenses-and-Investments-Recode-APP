@@ -135,7 +135,7 @@ export default function CategoriesPage() {
       if (editingCategory) {
         const { error } = await supabase
           .from('categories')
-          .update({ name, type, icon, color })
+          .update({ name, type, icon, color } as any)
           .eq('id', editingCategory.id)
 
         if (error) throw error
@@ -143,7 +143,7 @@ export default function CategoriesPage() {
       } else {
         const { error } = await supabase
           .from('categories')
-          .insert(categoryData)
+          .insert(categoryData as any)
 
         if (error) throw error
         toast({ title: 'Category created' })

@@ -111,7 +111,7 @@ export default function InvestmentsPage() {
       .gt('quantity', 0)
 
     if (holdingsData) {
-      setHoldings(holdingsData.map(h => ({
+      setHoldings((holdingsData as any[]).map(h => ({
         ...h,
         asset: Array.isArray(h.asset) ? h.asset[0] : h.asset,
         account: Array.isArray(h.account) ? h.account[0] : h.account,
@@ -167,7 +167,7 @@ export default function InvestmentsPage() {
             name,
             asset_type: assetType,
             current_price: decimalToCents(parseFloat(price)),
-          })
+          } as any)
           .select('id')
           .single()
 
@@ -190,7 +190,7 @@ export default function InvestmentsPage() {
           price: priceInCents,
           fees: 0,
           date: format(new Date(), 'yyyy-MM-dd'),
-        })
+        } as any)
 
       if (txError) throw txError
 
@@ -217,7 +217,7 @@ export default function InvestmentsPage() {
             average_cost: Math.round(newAvgCost),
             total_cost: newTotalCost,
             current_value: newQuantity * priceInCents,
-          })
+          } as any)
           .eq('id', existingHolding.id)
       } else {
         await supabase
@@ -230,7 +230,7 @@ export default function InvestmentsPage() {
             average_cost: priceInCents,
             total_cost: totalCost,
             current_value: totalCost,
-          })
+          } as any)
       }
 
       toast({

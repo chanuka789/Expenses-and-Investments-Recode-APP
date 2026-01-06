@@ -91,7 +91,7 @@ export default function BudgetsPage() {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
     // Fetch budgets
-    const { data: budgetsData } = await supabase
+    const { data: budgetsRaw } = await supabase
       .from('budgets')
       .select(`
         id, name, amount, currency, period, category_id,
@@ -101,13 +101,16 @@ export default function BudgetsPage() {
       .eq('is_active', true)
 
     // Fetch transactions for spending
-    const { data: transactions } = await supabase
+    const { data: txRaw } = await supabase
       .from('transactions')
       .select('amount, category_id')
       .eq('user_id', session.user.id)
       .eq('type', 'expense')
       .gte('date', format(monthStart, 'yyyy-MM-dd'))
       .lte('date', format(monthEnd, 'yyyy-MM-dd'))
+
+    const budgetsData = budgetsRaw as any[] | null
+    const transactions = txRaw as any[] | null
 
     if (budgetsData) {
       const budgetsWithSpent = budgetsData.map((b) => {
@@ -164,7 +167,7 @@ export default function BudgetsPage() {
       if (editingBudget) {
         const { error } = await supabase
           .from('budgets')
-          .update(budgetData)
+          .update(budgetData as any)
           .eq('id', editingBudget.id)
 
         if (error) throw error
@@ -172,7 +175,7 @@ export default function BudgetsPage() {
       } else {
         const { error } = await supabase
           .from('budgets')
-          .insert(budgetData)
+          .insert(budgetData as any)
 
         if (error) throw error
         toast({ title: 'Budget created', description: 'Your new budget is ready.' })

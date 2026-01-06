@@ -103,7 +103,7 @@ export default function TransactionsPage() {
         variant: 'destructive',
       })
     } else {
-      setTransactions(data?.map(t => ({
+      setTransactions((data as any[] | null)?.map(t => ({
         ...t,
         category: Array.isArray(t.category) ? t.category[0] : t.category,
         account: Array.isArray(t.account) ? t.account[0] : t.account,
@@ -372,7 +372,7 @@ export default function TransactionsPage() {
           }
         }}
         type={dialogType}
-        transaction={editingTransaction || undefined}
+        transaction={editingTransaction as any}
       />
 
       {/* Delete Confirmation */}

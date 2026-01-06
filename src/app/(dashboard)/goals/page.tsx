@@ -124,7 +124,7 @@ export default function GoalsPage() {
       if (editingGoal) {
         const { error } = await supabase
           .from('goals')
-          .update(goalData)
+          .update(goalData as any)
           .eq('id', editingGoal.id)
 
         if (error) throw error
@@ -132,7 +132,7 @@ export default function GoalsPage() {
       } else {
         const { error } = await supabase
           .from('goals')
-          .insert(goalData)
+          .insert(goalData as any)
 
         if (error) throw error
         toast({ title: 'Goal created' })
@@ -165,7 +165,7 @@ export default function GoalsPage() {
   const handleComplete = async (goal: Goal) => {
     const { error } = await supabase
       .from('goals')
-      .update({ is_completed: !goal.is_completed })
+      .update({ is_completed: !goal.is_completed } as any)
       .eq('id', goal.id)
 
     if (error) {

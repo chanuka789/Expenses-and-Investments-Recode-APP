@@ -441,11 +441,16 @@ CREATE POLICY "Users can delete their own budgets"
   ON budgets FOR DELETE
   USING (auth.uid() = user_id);
 
--- Assets policies (public read, admin write)
+-- Assets policies (public read, authenticated users can add)
 CREATE POLICY "Anyone can view assets"
   ON assets FOR SELECT
   TO authenticated
   USING (true);
+
+CREATE POLICY "Authenticated users can add assets"
+  ON assets FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
 
 -- Investment transactions policies
 CREATE POLICY "Users can view their own investment transactions"

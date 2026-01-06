@@ -1,10 +1,64 @@
 -- =====================================================
 -- Finance Tracker Database Schema
 -- Complete PostgreSQL schema for Supabase
+-- This schema is idempotent and can be run multiple times
 -- =====================================================
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =====================================================
+-- DROP EXISTING POLICIES (for re-running schema)
+-- =====================================================
+DO $$
+BEGIN
+  -- Drop all existing policies to allow re-creation
+  DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+  DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+  DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+  DROP POLICY IF EXISTS "Users can view their own accounts" ON accounts;
+  DROP POLICY IF EXISTS "Users can create their own accounts" ON accounts;
+  DROP POLICY IF EXISTS "Users can update their own accounts" ON accounts;
+  DROP POLICY IF EXISTS "Users can delete their own accounts" ON accounts;
+  DROP POLICY IF EXISTS "Users can view their own categories" ON categories;
+  DROP POLICY IF EXISTS "Users can create their own categories" ON categories;
+  DROP POLICY IF EXISTS "Users can update their own categories" ON categories;
+  DROP POLICY IF EXISTS "Users can delete their own categories" ON categories;
+  DROP POLICY IF EXISTS "Users can view their own tags" ON tags;
+  DROP POLICY IF EXISTS "Users can create their own tags" ON tags;
+  DROP POLICY IF EXISTS "Users can update their own tags" ON tags;
+  DROP POLICY IF EXISTS "Users can delete their own tags" ON tags;
+  DROP POLICY IF EXISTS "Users can view their own transactions" ON transactions;
+  DROP POLICY IF EXISTS "Users can create their own transactions" ON transactions;
+  DROP POLICY IF EXISTS "Users can update their own transactions" ON transactions;
+  DROP POLICY IF EXISTS "Users can delete their own transactions" ON transactions;
+  DROP POLICY IF EXISTS "Users can manage transaction tags via transactions" ON transaction_tags;
+  DROP POLICY IF EXISTS "Users can manage splits via transactions" ON transaction_splits;
+  DROP POLICY IF EXISTS "Users can view their own recurring rules" ON recurring_rules;
+  DROP POLICY IF EXISTS "Users can create their own recurring rules" ON recurring_rules;
+  DROP POLICY IF EXISTS "Users can update their own recurring rules" ON recurring_rules;
+  DROP POLICY IF EXISTS "Users can delete their own recurring rules" ON recurring_rules;
+  DROP POLICY IF EXISTS "Users can view their own budgets" ON budgets;
+  DROP POLICY IF EXISTS "Users can create their own budgets" ON budgets;
+  DROP POLICY IF EXISTS "Users can update their own budgets" ON budgets;
+  DROP POLICY IF EXISTS "Users can delete their own budgets" ON budgets;
+  DROP POLICY IF EXISTS "Anyone can view assets" ON assets;
+  DROP POLICY IF EXISTS "Authenticated users can add assets" ON assets;
+  DROP POLICY IF EXISTS "Users can view their own investment transactions" ON investment_transactions;
+  DROP POLICY IF EXISTS "Users can create their own investment transactions" ON investment_transactions;
+  DROP POLICY IF EXISTS "Users can update their own investment transactions" ON investment_transactions;
+  DROP POLICY IF EXISTS "Users can delete their own investment transactions" ON investment_transactions;
+  DROP POLICY IF EXISTS "Users can view their own holdings" ON holdings;
+  DROP POLICY IF EXISTS "Users can manage their own holdings" ON holdings;
+  DROP POLICY IF EXISTS "Users can view their own portfolio snapshots" ON portfolio_snapshots;
+  DROP POLICY IF EXISTS "Users can manage their own portfolio snapshots" ON portfolio_snapshots;
+  DROP POLICY IF EXISTS "Users can view their own goals" ON goals;
+  DROP POLICY IF EXISTS "Users can create their own goals" ON goals;
+  DROP POLICY IF EXISTS "Users can update their own goals" ON goals;
+  DROP POLICY IF EXISTS "Users can delete their own goals" ON goals;
+EXCEPTION
+  WHEN undefined_table THEN NULL;
+END $$;
 
 -- =====================================================
 -- PROFILES TABLE
@@ -41,8 +95,8 @@ CREATE TABLE IF NOT EXISTS accounts (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_accounts_user_id ON accounts(user_id);
-CREATE INDEX idx_accounts_type ON accounts(user_id, type);
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_type ON accounts(user_id, type);
 
 -- =====================================================
 -- CATEGORIES TABLE
@@ -61,8 +115,8 @@ CREATE TABLE IF NOT EXISTS categories (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_categories_user_id ON categories(user_id);
-CREATE INDEX idx_categories_type ON categories(user_id, type);
+CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id);
+CREATE INDEX IF NOT EXISTS idx_categories_type ON categories(user_id, type);
 
 -- =====================================================
 -- TAGS TABLE
@@ -75,7 +129,7 @@ CREATE TABLE IF NOT EXISTS tags (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_tags_user_id ON tags(user_id);
+CREATE INDEX IF NOT EXISTS idx_tags_user_id ON tags(user_id);
 
 -- =====================================================
 -- TRANSACTIONS TABLE
@@ -99,12 +153,12 @@ CREATE TABLE IF NOT EXISTS transactions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_transactions_user_id ON transactions(user_id);
-CREATE INDEX idx_transactions_date ON transactions(user_id, date DESC);
-CREATE INDEX idx_transactions_category ON transactions(user_id, category_id);
-CREATE INDEX idx_transactions_account ON transactions(user_id, account_id);
-CREATE INDEX idx_transactions_type ON transactions(user_id, type);
-CREATE INDEX idx_transactions_merchant ON transactions(user_id, merchant);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(user_id, category_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(user_id, account_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(user_id, type);
+CREATE INDEX IF NOT EXISTS idx_transactions_merchant ON transactions(user_id, merchant);
 
 -- =====================================================
 -- TRANSACTION TAGS (Many-to-Many)
@@ -115,8 +169,8 @@ CREATE TABLE IF NOT EXISTS transaction_tags (
   PRIMARY KEY (transaction_id, tag_id)
 );
 
-CREATE INDEX idx_transaction_tags_transaction ON transaction_tags(transaction_id);
-CREATE INDEX idx_transaction_tags_tag ON transaction_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_tags_transaction ON transaction_tags(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_tags_tag ON transaction_tags(tag_id);
 
 -- =====================================================
 -- TRANSACTION SPLITS TABLE
@@ -130,7 +184,7 @@ CREATE TABLE IF NOT EXISTS transaction_splits (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_transaction_splits_transaction ON transaction_splits(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_splits_transaction ON transaction_splits(transaction_id);
 
 -- =====================================================
 -- RECURRING RULES TABLE
@@ -156,8 +210,8 @@ CREATE TABLE IF NOT EXISTS recurring_rules (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_recurring_rules_user_id ON recurring_rules(user_id);
-CREATE INDEX idx_recurring_rules_next_run ON recurring_rules(next_run_at) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_recurring_rules_user_id ON recurring_rules(user_id);
+CREATE INDEX IF NOT EXISTS idx_recurring_rules_next_run ON recurring_rules(next_run_at) WHERE is_active = TRUE;
 
 -- =====================================================
 -- BUDGETS TABLE
@@ -178,8 +232,8 @@ CREATE TABLE IF NOT EXISTS budgets (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_budgets_user_id ON budgets(user_id);
-CREATE INDEX idx_budgets_category ON budgets(user_id, category_id);
+CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets(user_id);
+CREATE INDEX IF NOT EXISTS idx_budgets_category ON budgets(user_id, category_id);
 
 -- =====================================================
 -- ASSETS TABLE (Investments)
@@ -199,8 +253,8 @@ CREATE TABLE IF NOT EXISTS assets (
   UNIQUE(symbol, asset_type)
 );
 
-CREATE INDEX idx_assets_symbol ON assets(symbol);
-CREATE INDEX idx_assets_type ON assets(asset_type);
+CREATE INDEX IF NOT EXISTS idx_assets_symbol ON assets(symbol);
+CREATE INDEX IF NOT EXISTS idx_assets_type ON assets(asset_type);
 
 -- =====================================================
 -- INVESTMENT TRANSACTIONS TABLE
@@ -221,10 +275,10 @@ CREATE TABLE IF NOT EXISTS investment_transactions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_investment_transactions_user ON investment_transactions(user_id);
-CREATE INDEX idx_investment_transactions_account ON investment_transactions(account_id);
-CREATE INDEX idx_investment_transactions_asset ON investment_transactions(asset_id);
-CREATE INDEX idx_investment_transactions_date ON investment_transactions(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_investment_transactions_user ON investment_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_investment_transactions_account ON investment_transactions(account_id);
+CREATE INDEX IF NOT EXISTS idx_investment_transactions_asset ON investment_transactions(asset_id);
+CREATE INDEX IF NOT EXISTS idx_investment_transactions_date ON investment_transactions(user_id, date DESC);
 
 -- =====================================================
 -- HOLDINGS TABLE
@@ -244,9 +298,9 @@ CREATE TABLE IF NOT EXISTS holdings (
   UNIQUE(user_id, account_id, asset_id)
 );
 
-CREATE INDEX idx_holdings_user ON holdings(user_id);
-CREATE INDEX idx_holdings_account ON holdings(account_id);
-CREATE INDEX idx_holdings_asset ON holdings(asset_id);
+CREATE INDEX IF NOT EXISTS idx_holdings_user ON holdings(user_id);
+CREATE INDEX IF NOT EXISTS idx_holdings_account ON holdings(account_id);
+CREATE INDEX IF NOT EXISTS idx_holdings_asset ON holdings(asset_id);
 
 -- =====================================================
 -- PORTFOLIO SNAPSHOTS TABLE
@@ -263,7 +317,7 @@ CREATE TABLE IF NOT EXISTS portfolio_snapshots (
   UNIQUE(user_id, date)
 );
 
-CREATE INDEX idx_portfolio_snapshots_user_date ON portfolio_snapshots(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_portfolio_snapshots_user_date ON portfolio_snapshots(user_id, date DESC);
 
 -- =====================================================
 -- GOALS TABLE
@@ -284,7 +338,7 @@ CREATE TABLE IF NOT EXISTS goals (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_goals_user ON goals(user_id);
+CREATE INDEX IF NOT EXISTS idx_goals_user ON goals(user_id);
 
 -- =====================================================
 -- ROW LEVEL SECURITY POLICIES
